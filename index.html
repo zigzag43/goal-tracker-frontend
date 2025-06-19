@@ -1,323 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skill Mastery Goal Tracker</title>
-    <link rel="stylesheet" href="style.css" />
-
+    <link rel="stylesheet" href="style.css">
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-  </head>
-  <body>
+</head>
+<body>
     <!-- Login/Signup Modal - App suru ma yo dekhaucha -->
     <div id="auth-overlay" class="auth-overlay">
-      <div class="auth-modal">
-        <h2 class="auth-title">Welcome to Goal Tracker</h2>
-
-        <!-- Login Form -->
-        <div id="login-form" class="auth-form">
-          <h3>Login to Continue</h3>
-          <input
-            type="email"
-            id="login-email"
-            placeholder="Enter your email"
-            required
-          />
-          <input
-            type="password"
-            id="login-password"
-            placeholder="Enter your password"
-            required
-          />
-          <button type="button" onclick="handleLogin()" class="btn btn-primary">
-            Login
-          </button>
-          <p class="auth-switch">
-            New user? <a href="#" onclick="showSignup()">Create account</a>
-          </p>
+        <div class="auth-modal">
+            <h2 class="auth-title">Welcome to Goal Tracker</h2>
+            
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form">
+                <h3>Login to Continue</h3>
+                <input type="email" id="login-email" placeholder="Enter your email" required>
+                <input type="password" id="login-password" placeholder="Enter your password" required>
+                <button type="button" onclick="handleLogin()" class="btn btn-primary">Login</button>
+                <p class="auth-switch">New user? <a href="#" onclick="showSignup()">Create account</a></p>
+            </div>
+            
+            <!-- Signup Form -->
+            <div id="signup-form" class="auth-form" style="display: none;">
+                <h3>Create New Account</h3>
+                <input type="email" id="signup-email" placeholder="Enter your email" required>
+                <input type="password" id="signup-password" placeholder="Password (min 6 characters)" required>
+                <input type="password" id="confirm-password" placeholder="Confirm password" required>
+                <button type="button" onclick="handleSignup()" class="btn btn-primary">Create Account</button>
+                <p class="auth-switch">Already have account? <a href="#" onclick="showLogin()">Login</a></p>
+            </div>
         </div>
-
-        <!-- Signup Form -->
-        <div id="signup-form" class="auth-form" style="display: none">
-          <h3>Create New Account</h3>
-          <input
-            type="email"
-            id="signup-email"
-            placeholder="Enter your email"
-            required
-          />
-          <input
-            type="password"
-            id="signup-password"
-            placeholder="Password (min 6 characters)"
-            required
-          />
-          <input
-            type="password"
-            id="confirm-password"
-            placeholder="Confirm password"
-            required
-          />
-          <button
-            type="button"
-            onclick="handleSignup()"
-            class="btn btn-primary"
-          >
-            Create Account
-          </button>
-          <p class="auth-switch">
-            Already have account? <a href="#" onclick="showLogin()">Login</a>
-          </p>
-        </div>
-      </div>
     </div>
 
     <!-- Main App Container (Login paxi dekhaucha) -->
-    <div class="container" id="main-app" style="display: none">
-      <!-- User Header -->
-      <div class="user-header">
-        <div class="user-info">
-          <span>Welcome, <strong id="user-email-display"></strong></span>
+    <div class="container" id="main-app" style="display: none;">
+        <!-- User Header -->
+        <div class="user-header">
+            <div class="user-info">
+                <span>Welcome, <strong id="user-email-display"></strong></span>
+            </div>
+            <button onclick="handleLogout()" class="btn logout-btn">Logout</button>
         </div>
-        <button onclick="handleLogout()" class="btn logout-btn">Logout</button>
-      </div>
 
-      <!-- Original Header Section with Modifications -->
-      <div class="header">
-        <h1>Skill Mastery Goal Tracker</h1>
-        <p class="motivation">"Track your goals, Master your skills"</p>
-
-        <div class="progress-section">
-          <div class="main-progress">
-            <div class="progress-container">
-              <div
-                class="progress-bar"
-                id="main-progress-bar"
-                style="width: 0%"
-              ></div>
-            </div>
-            <div class="progress-label">
-              <span id="current-milestone">Current Progress: 0%</span>
-              <span id="total-goals">Total Goals: 0</span>
-            </div>
-          </div>
-
-          <div class="xp-display">
-            <h3>Goals Completed</h3>
-            <div class="xp-value" id="completed-goals">0</div>
-            <div class="xp-progress" id="completion-rate">
-              0% completion rate
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Week Navigation (Modified for Goals) -->
-      <div class="week-nav">
-        <div class="week-day active" onclick="filterGoals('all')">
-          All Goals
-        </div>
-        <div class="week-day" onclick="filterGoals('today')">Today</div>
-        <div class="week-day" onclick="filterGoals('week')">This Week</div>
-        <div class="week-day" onclick="filterGoals('month')">This Month</div>
-        <div class="week-day" onclick="filterGoals('completed')">Completed</div>
-        <div class="week-day" onclick="filterGoals('pending')">Pending</div>
-      </div>
-
-      <div class="content-grid">
-        <!-- Left Column -->
-        <div class="left-column">
-          <!-- Add Goal Section -->
-          <div class="task-section">
-            <div class="section-title">
-              <h2>Add New Goal</h2>
-              <span class="badge" id="active-goals-count">0 active</span>
-            </div>
-
-            <form id="goal-form" class="goal-form">
-              <input
-                type="text"
-                id="goal-title"
-                placeholder="Goal Title"
-                required
-              />
-              <textarea
-                id="goal-description"
-                placeholder="Goal Description"
-                rows="3"
-              ></textarea>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Category</label>
-                  <select id="goal-category">
-                    <option value="skill">Skill Development</option>
-                    <option value="health">Health & Fitness</option>
-                    <option value="career">Career</option>
-                    <option value="personal">Personal</option>
-                    <option value="finance">Finance</option>
-                    <option value="education">Education</option>
-                  </select>
+        <!-- Original Header Section with Modifications -->
+        <div class="header">
+            <h1>Skill Mastery Goal Tracker</h1>
+            <p class="motivation">"Track your goals, Master your skills"</p>
+            
+            <div class="progress-section">
+                <div class="main-progress">
+                    <div class="progress-container">
+                        <div class="progress-bar" id="main-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-label">
+                        <span id="current-milestone">Current Progress: 0%</span>
+                        <span id="total-goals">Total Goals: 0</span>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                  <label>Priority</label>
-                  <select id="goal-priority">
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                  </select>
+                
+                <div class="xp-display">
+                    <h3>Goals Completed</h3>
+                    <div class="xp-value" id="completed-goals">0</div>
+                    <div class="xp-progress" id="completion-rate">0% completion rate</div>
                 </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Target Date</label>
-                  <input type="date" id="goal-deadline" required />
-                </div>
-
-                <div class="form-group">
-                  <label>Reminder</label>
-                  <select id="goal-reminder">
-                    <option value="none">No Reminder</option>
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                  </select>
-                </div>
-              </div>
-
-              <button type="submit" class="btn btn-primary">Add Goal</button>
-            </form>
-          </div>
-
-          <!-- Goals List Section -->
-          <div class="task-section">
-            <div class="section-title">
-              <h2>My Goals</h2>
-              <div class="sort-options">
-                <select id="sort-goals" onchange="sortGoals(this.value)">
-                  <option value="date-desc">Newest First</option>
-                  <option value="date-asc">Oldest First</option>
-                  <option value="priority">By Priority</option>
-                  <option value="deadline">By Deadline</option>
-                </select>
-              </div>
             </div>
-
-            <div id="goals-container" class="goals-container">
-              <!-- Goals will be dynamically loaded here -->
-              <div class="loading">Loading your goals...</div>
-            </div>
-          </div>
         </div>
-
-        <!-- Right Column -->
-        <div class="right-column">
-          <!-- Timer Section (Reused from original) -->
-          <div class="timer-section">
-            <div class="section-title">
-              <h2>Focus Timer</h2>
-            </div>
-
-            <select class="timer-session-select" id="session-select">
-              <option value="25">Pomodoro (25 min)</option>
-              <option value="50">Deep Work (50 min)</option>
-              <option value="90">Extended Focus (90 min)</option>
-            </select>
-
-            <div class="timer-display" id="timer-display">25:00</div>
-
-            <div class="timer-controls">
-              <button
-                class="btn btn-primary"
-                id="start-timer"
-                onclick="startTimer()"
-              >
-                Start
-              </button>
-              <button
-                class="btn btn-danger"
-                id="reset-timer"
-                onclick="resetTimer()"
-                disabled
-              >
-                Reset
-              </button>
-            </div>
-          </div>
-
-          <!-- Stats Section -->
-          <div class="stats-section">
-            <div class="section-title">
-              <h2>Goal Statistics</h2>
-            </div>
-
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-label">Total Goals</div>
-                <div class="stat-value" id="stat-total">0</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-label">Completed</div>
-                <div class="stat-value" id="stat-completed">0</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-label">In Progress</div>
-                <div class="stat-value" id="stat-progress">0</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-label">Overdue</div>
-                <div class="stat-value" id="stat-overdue">0</div>
-              </div>
-            </div>
-
-            <!-- Category Progress -->
-            <div class="category-progress">
-              <h3>Progress by Category</h3>
-              <div id="category-chart">
-                <!-- Category progress bars will be here -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Quick Actions -->
-          <div class="stats-section">
-            <div class="section-title">
-              <h2>Quick Actions</h2>
-            </div>
-
-            <div class="quick-actions">
-              <button onclick="exportGoals()" class="btn btn-outline">
-                Export Goals
-              </button>
-              <button onclick="importGoals()" class="btn btn-outline">
-                Import Goals
-              </button>
-              <button onclick="clearCompleted()" class="btn btn-danger">
-                Clear Completed
-              </button>
-            </div>
-
-            <input
-              type="file"
-              id="import-file"
-              accept=".json"
-              style="display: none"
-            />
-          </div>
+        
+        <!-- Week Navigation (Modified for Goals) -->
+        <div class="week-nav">
+            <div class="week-day active" onclick="filterGoals('all')">All Goals</div>
+            <div class="week-day" onclick="filterGoals('today')">Today</div>
+            <div class="week-day" onclick="filterGoals('week')">This Week</div>
+            <div class="week-day" onclick="filterGoals('month')">This Month</div>
+            <div class="week-day" onclick="filterGoals('completed')">Completed</div>
+            <div class="week-day" onclick="filterGoals('pending')">Pending</div>
         </div>
-      </div>
+        
+        <div class="content-grid">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Add Goal Section -->
+                <div class="task-section">
+                    <div class="section-title">
+                        <h2>Add New Goal</h2>
+                        <span class="badge" id="active-goals-count">0 active</span>
+                    </div>
+                    
+                    <form id="goal-form" class="goal-form">
+                        <input type="text" id="goal-title" placeholder="Goal Title" required>
+                        <textarea id="goal-description" placeholder="Goal Description" rows="3"></textarea>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select id="goal-category">
+                                    <option value="skill">Skill Development</option>
+                                    <option value="health">Health & Fitness</option>
+                                    <option value="career">Career</option>
+                                    <option value="personal">Personal</option>
+                                    <option value="finance">Finance</option>
+                                    <option value="education">Education</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Priority</label>
+                                <select id="goal-priority">
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Target Date</label>
+                                <input type="date" id="goal-deadline" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Reminder</label>
+                                <select id="goal-reminder">
+                                    <option value="none">No Reminder</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Add Goal</button>
+                    </form>
+                </div>
+                
+                <!-- Goals List Section -->
+                <div class="task-section">
+                    <div class="section-title">
+                        <h2>My Goals</h2>
+                        <div class="sort-options">
+                            <select id="sort-goals" onchange="sortGoals(this.value)">
+                                <option value="date-desc">Newest First</option>
+                                <option value="date-asc">Oldest First</option>
+                                <option value="priority">By Priority</option>
+                                <option value="deadline">By Deadline</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="goals-container" class="goals-container">
+                        <!-- Goals will be dynamically loaded here -->
+                        <div class="loading">Loading your goals...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Timer Section (Reused from original) -->
+                <div class="timer-section">
+                    <div class="section-title">
+                        <h2>Focus Timer</h2>
+                    </div>
+                    
+                    <select class="timer-session-select" id="session-select">
+                        <option value="25">Pomodoro (25 min)</option>
+                        <option value="50">Deep Work (50 min)</option>
+                        <option value="90">Extended Focus (90 min)</option>
+                    </select>
+                    
+                    <div class="timer-display" id="timer-display">25:00</div>
+                    
+                    <div class="timer-controls">
+                        <button class="btn btn-primary" id="start-timer" onclick="startTimer()">Start</button>
+                        <button class="btn btn-danger" id="reset-timer" onclick="resetTimer()" disabled>Reset</button>
+                    </div>
+                </div>
+                
+                <!-- Stats Section -->
+                <div class="stats-section">
+                    <div class="section-title">
+                        <h2>Goal Statistics</h2>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Total Goals</div>
+                            <div class="stat-value" id="stat-total">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Completed</div>
+                            <div class="stat-value" id="stat-completed">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">In Progress</div>
+                            <div class="stat-value" id="stat-progress">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Overdue</div>
+                            <div class="stat-value" id="stat-overdue">0</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Category Progress -->
+                    <div class="category-progress">
+                        <h3>Progress by Category</h3>
+                        <div id="category-chart">
+                            <!-- Category progress bars will be here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="stats-section">
+                    <div class="section-title">
+                        <h2>Quick Actions</h2>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <button onclick="exportGoals()" class="btn btn-outline">Export Goals</button>
+                        <button onclick="importGoals()" class="btn btn-outline">Import Goals</button>
+                        <button onclick="clearCompleted()" class="btn btn-danger">Clear Completed</button>
+                    </div>
+                    
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                </div>
+            </div>
+        </div>
     </div>
-
+    
     <!-- Notification Container -->
     <div id="notification-container"></div>
-
+    
     <!-- Scripts -->
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <script src="script.js"></script>
-  </body>
+</body>
 </html>
