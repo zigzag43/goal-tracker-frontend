@@ -1,11 +1,11 @@
 // Firebase configuration - yo Firebase console bata copy garnus
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY_HERE",
-    authDomain: "YOUR_AUTH_DOMAIN_HERE",
-    projectId: "YOUR_PROJECT_ID_HERE",
-    storageBucket: "YOUR_STORAGE_BUCKET_HERE",
-    messagingSenderId: "YOUR_SENDER_ID_HERE",
-    appId: "YOUR_APP_ID_HERE"
+  apiKey: "AIzaSyDKPSB7GKdZulDN-IlziyxDM5eFYxw3x8s",
+  authDomain: "goal-tracker-603fd.firebaseapp.com",
+  projectId: "goal-tracker-603fd",
+  storageBucket: "goal-tracker-603fd.firebasestorage.app",
+  messagingSenderId: "738934868779",
+  appId: "1:738934868779:web:a45c12092102f69d49536e"
 };
 
 // Backend API configuration
@@ -13,7 +13,7 @@ const API_CONFIG = {
     // Development ma localhost, production ma actual URL
     BASE_URL: window.location.hostname === 'localhost' 
         ? 'http://localhost:5000/api' 
-        : 'https://your-backend-url.onrender.com/api',
+        : 'https://goal-tracker-backend-9ksu.onrender.com',
     
     // API endpoints
     ENDPOINTS: {
